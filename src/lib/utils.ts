@@ -46,3 +46,60 @@ export function getEndOfWeek(): Date {
   date.setHours(23, 59, 59, 0);
   return date;
 }
+
+/**
+ * Convert a HEX color to HSL 
+ * Use modifiers to modify the final % from the orginal color
+ */
+export function hexToHSL(hexColor: string, hueModifier: number, saturationModifier: number, lightModifier: number): string {
+  // Convert hex to RGB first
+  let r = 0, g = 0, b = 0;
+  if (hexColor.length == 4) {
+    r = ("0x" + hexColor[1] + hexColor[1]) as any / 255;
+    g = ("0x" + hexColor[2] + hexColor[2]) as any / 255;
+    b = ("0x" + hexColor[3] + hexColor[3]) as any / 255;
+  } else if (hexColor.length == 7) {
+    r = ("0x" + hexColor[1] + hexColor[2]) as any / 255;
+    g = ("0x" + hexColor[3] + hexColor[4]) as any / 255;
+    b = ("0x" + hexColor[5] + hexColor[6]) as any / 255;
+  }
+  // Then to HSL
+  let cmin = Math.min(r, g, b),
+      cmax = Math.max(r, g, b),
+      delta = cmax - cmin,
+      h = 0,
+      s = 0,
+      l = 0;
+
+  if (delta == 0)
+    h = 0;
+  else if (cmax == r)
+    h = ((g - b) / delta) % 6;
+  else if (cmax == g)
+    h = (b - r) / delta + 2;
+  else
+    h = (r - g) / delta + 4;
+
+  h = Math.round(h * 60);
+
+  if (h < 0)
+    h += 360;
+
+  l = (cmax + cmin) / 2;
+  s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+  s = +(s * 100).toFixed(1);
+  l = +(l * 100).toFixed(1);
+
+  // Add modified to hue, light and saturation
+  if (hueModifier) {
+    h = h + hueModifier;
+  }
+  if (saturationModifier) {
+    s = s + saturationModifier;
+  }
+  if (lightModifier) {
+    l = l + lightModifier;
+  }
+
+  return `hsl(${h},${s}%,${l}%)`;
+}
